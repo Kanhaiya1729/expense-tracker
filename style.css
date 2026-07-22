@@ -1,0 +1,447 @@
+/* =====================================================
+   EXPENSE TRACKER - STYLESHEET
+   Built on top of Bootstrap 5. This file only adds what
+   Bootstrap doesn't already give us: colors (design tokens),
+   the receipt-style dashboard, cards, table polish, and
+   dark mode.
+   ===================================================== */
+
+/* -----------------------------------------------------
+   1. DESIGN TOKENS (CSS Custom Properties)
+   Why: instead of hardcoding colors everywhere, we define
+   them once as variables. This makes dark mode possible
+   (we just swap the variable values) and keeps the palette
+   consistent. This is a very common interview talking point:
+   "How did you implement dark mode without duplicating CSS?"
+   ----------------------------------------------------- */
+:root {
+  /* Brand colors */
+  --color-primary: #2f5d50;       /* deep teal-green - main brand color */
+  --color-primary-dark: #234439;
+  --color-accent: #3ddc97;        /* mint green - used for highlights */
+
+  /* Semantic colors */
+  --color-income: #1f9d6b;        /* green - money coming in */
+  --color-expense: #e5533d;       /* coral-red - money going out */
+
+  /* Soft tints (used behind icons) */
+  --color-soft-primary: #e8f0ee;
+  --color-soft-income: #e3f6ec;
+  --color-soft-expense: #fdeae7;
+
+  /* Surface / background colors */
+  --bg-body: #f5f7f8;
+  --bg-surface: #ffffff;
+  --bg-navbar: #ffffff;
+
+  /* Text colors */
+  --text-primary: #1b1f23;
+  --text-muted: #6b7280;
+
+  /* Borders & shadows */
+  --border-color: #e5e7eb;
+  --shadow-soft: 0 4px 16px rgba(17, 24, 39, 0.06);
+  --shadow-medium: 0 8px 24px rgba(17, 24, 39, 0.10);
+
+  /* Radius scale */
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  /* Fonts */
+  --font-heading: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+/* -----------------------------------------------------
+   2. DARK MODE TOKENS
+   Why: We toggle a `data-theme="dark"` attribute on <html>
+   using JavaScript. When that attribute is present, these
+   variables override the ones above. Every component below
+   uses var(--...) so it automatically re-colors itself -
+   we never touch component CSS to support dark mode.
+   ----------------------------------------------------- */
+html[data-theme="dark"] {
+  --bg-body: #12161a;
+  --bg-surface: #1b2127;
+  --bg-navbar: #1b2127;
+
+  --text-primary: #eef1f4;
+  --text-muted: #9aa4af;
+
+  --border-color: #2b333b;
+
+  --color-soft-primary: #1e2f2a;
+  --color-soft-income: #17301f;
+  --color-soft-expense: #331d1c;
+
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* -----------------------------------------------------
+   3. BASE / RESET
+   ----------------------------------------------------- */
+body {
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1, h2, h3, h4, h5, h6,
+.app-brand,
+.panel-title,
+.receipt-value,
+.stat-value {
+  font-family: var(--font-heading);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+.text-income {
+  color: var(--color-income) !important;
+}
+
+.text-expense {
+  color: var(--color-expense) !important;
+}
+
+/* -----------------------------------------------------
+   4. NAVBAR
+   ----------------------------------------------------- */
+.app-navbar {
+  background-color: var(--bg-navbar);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-soft);
+  padding: 0.75rem 0;
+}
+
+.app-brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.btn-icon {
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background: var(--color-soft-primary);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+/* -----------------------------------------------------
+   5. RECEIPT STRIP (Dashboard summary - signature element)
+   Why a "receipt" look: this is an expense tracker, so the
+   summary card borrows the visual language of a paper
+   receipt - a perforated top edge and dashed dividers
+   between Balance / Income / Expense. It's a small detail
+   that makes the dashboard feel designed for this app
+   specifically, not a generic 3-card row.
+   ----------------------------------------------------- */
+.receipt-strip {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-medium);
+  position: relative;
+  overflow: hidden;
+  border-top: 4px dashed var(--color-accent);
+}
+
+/* The perforated "notches" along the top edge, made purely
+   with a repeating radial-gradient - no images needed. */
+.receipt-strip::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background-image: radial-gradient(
+    circle at center,
+    var(--bg-body) 0,
+    var(--bg-body) 6px,
+    transparent 7px
+  );
+  background-size: 24px 20px;
+  background-repeat: repeat-x;
+}
+
+.receipt-cell {
+  padding: 1.75rem 1.5rem;
+  border-right: 1px dashed var(--border-color);
+}
+
+/* Remove the dashed border on the last column on desktop */
+.receipt-cell:last-child {
+  border-right: none;
+}
+
+/* On mobile, columns stack, so dashed borders should be
+   horizontal instead of vertical between stacked cells. */
+@media (max-width: 767.98px) {
+  .receipt-cell {
+    border-right: none;
+    border-bottom: 1px dashed var(--border-color);
+  }
+  .receipt-cell:last-child {
+    border-bottom: none;
+  }
+}
+
+.receipt-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.receipt-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.receipt-sub {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* -----------------------------------------------------
+   6. STAT CARDS
+   ----------------------------------------------------- */
+.stat-card {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+}
+
+.stat-icon {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--color-primary);
+}
+
+.bg-soft-primary { background-color: var(--color-soft-primary); color: var(--color-primary); }
+.bg-soft-income   { background-color: var(--color-soft-income); color: var(--color-income); }
+.bg-soft-expense  { background-color: var(--color-soft-expense); color: var(--color-expense); }
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* -----------------------------------------------------
+   7. PANEL CARDS (Charts + Transactions container)
+   ----------------------------------------------------- */
+.panel-card {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 1.5rem;
+}
+
+.panel-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 280px;
+}
+
+.empty-chart-msg {
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+/* -----------------------------------------------------
+   8. TRANSACTION TABLE
+   ----------------------------------------------------- */
+.transaction-table thead th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  padding-bottom: 0.75rem;
+}
+
+.transaction-table tbody td {
+  border-bottom: 1px solid var(--border-color);
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+  vertical-align: middle;
+}
+
+.transaction-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.category-badge {
+  background-color: var(--color-soft-primary);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.type-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.type-badge.income {
+  background-color: var(--color-soft-income);
+  color: var(--color-income);
+}
+
+.type-badge.expense {
+  background-color: var(--color-soft-expense);
+  color: var(--color-expense);
+}
+
+.row-action-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.row-action-btn:hover {
+  background-color: var(--color-soft-primary);
+  color: var(--color-primary);
+}
+
+.row-action-btn.delete-btn:hover {
+  background-color: var(--color-soft-expense);
+  color: var(--color-expense);
+}
+
+/* -----------------------------------------------------
+   9. EMPTY STATE
+   ----------------------------------------------------- */
+.empty-state-icon {
+  font-size: 3rem;
+  color: var(--border-color);
+}
+
+/* -----------------------------------------------------
+   10. MODAL & FORM TWEAKS
+   ----------------------------------------------------- */
+.modal-content {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: var(--radius-lg);
+  border: none;
+}
+
+.form-control,
+.form-select {
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.2rem rgba(47, 93, 80, 0.15);
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+}
+
+/* -----------------------------------------------------
+   11. FOOTER
+   ----------------------------------------------------- */
+footer {
+  color: var(--text-muted);
+}
+
+/* -----------------------------------------------------
+   12. RESPONSIVE FINE-TUNING
+   ----------------------------------------------------- */
+@media (max-width: 575.98px) {
+  .receipt-value {
+    font-size: 1.5rem;
+  }
+  .panel-card {
+    padding: 1rem;
+  }
+  .chart-wrap {
+    height: 220px;
+  }
+}
